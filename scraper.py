@@ -46,7 +46,7 @@ def parse_listing(keyword, city, state, start=1, sortby='distance'):
             scraped_results.extend(page_results)
             page_num += 1
         else:
-            return scraped_results
+            return pd.DataFrame(scraped_results)
 
 
 def process_page(url, headers, page):
@@ -137,24 +137,6 @@ def process_page(url, headers, page):
             return []
 
 
-def save_csv(data, keyword, city, state):
-    save_path = "{}_{}_{}_yellowpages_data.csv".format(keyword, city, state)
-
-    print("Writing scraped data to {}".format(save_path))
-    df = pd.DataFrame(data)
-    df = df.set_index('rank')
-    if os.path.exists(save_path):
-        print("Merging with old file")
-        df_old = pd.read_csv(save_path)
-        df_old = df_old.set_index('rank')
-
-        df = pd.concat([df_old, df])
-        df = df.drop_duplicates()
-        df = df.drop_duplicates("telephone")
-
-    df.to_csv(save_path)
-
-
 def parse_categories(category_keywords, city, state, seperate=False, start=1, sortby="distance"):
     results = [parse_listing(kw, city, state, start, sortby) for kw in category_keywords]
 
@@ -170,21 +152,4 @@ def parse_categories(category_keywords, city, state, seperate=False, start=1, so
 
     df_master = df_master.sort_values("rank")
     df_master = df_master.reset_index(drop=True)
-    df_master.to_csv("master_list.csv")
     return df_master
-
-
-def master_merge(dataframes):
-    csvs = glob.glob('*.csv')
-
-    dataframes = [pd.read_csv(csv) for csv in csvs]
-
-    df = pd.concat(dataframes)
-    print(len(df))
-    df = df.drop_duplicates("telephone")
-    df = df.sort_values("rank")
-    df = df.reset_index(drop=True)
-    df.to_csv("master_list.csv")
-    print(len(df))
-
-
