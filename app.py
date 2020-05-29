@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, Response
+from flask import Flask, request, render_template, Response, flash
 from scraper import parse_categories
 
 app = Flask(__name__, template_folder="templates")
@@ -9,7 +9,7 @@ def my_form():
 
 dataframes = {}
 
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['GET', 'POST'])
 def my_form_post():
 
     city = request.form['city']
@@ -17,6 +17,7 @@ def my_form_post():
     kw = request.form['keywords']
     seperate = False  # TODO : download each keyword as seperate csvs
     kw = [word.strip() for word in kw.split(",") if word.strip()]
+    flash('Looks like you have changed your name!')
 
     df = parse_categories(category_keywords=kw, city=city, state=state, seperate=seperate)
     csv = df.to_csv()
